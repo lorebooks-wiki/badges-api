@@ -1,0 +1,17 @@
+{
+  "git.alwaysSignOff": true,
+  "deno.enable": true,
+  "editor.inlayHints.enabled": "off",
+  "conventionalCommits.scopes": [
+    "docs",
+    "readme",
+    "lib",
+    "api",
+    "github-actions",
+    "issue-templates",
+    "issue-forms",
+    "global"
+  ],
+  "conventionalCommits.promptCI": true,
+  "conventionalCommits.emojiFormat": "code"
+}

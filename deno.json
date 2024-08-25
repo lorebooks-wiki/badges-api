@@ -1,0 +1,16 @@
+{
+  "imports": {
+    "hono": "jsr:@hono/hono@^4.5.8",
+    "badge-maker": "npm:badge-maker",
+    "chanfana": "npm:chanfana",
+    "zod": "npm:zod"
+  },
+  "tasks": {
+    "start": "deno run -A main.ts",
+    "dev": "deno run --watch -A main.ts"
+  },
+  "compilerOptions": {
+    "jsx": "precompile",
+    "jsxImportSource": "hono/jsx"
+  }
+}
