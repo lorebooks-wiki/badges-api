@@ -86,13 +86,13 @@ program
 
     if (options.type == "badge") {
         const data: BadgeData = {
-            label: options.label,
+            label: options.label || null,
             labelColor: options.labelColor,
             color: options.color,
             message: options.message,
-            logo: options.logo,
+            logo: options.logo || null,
             style: options.style,
-            links: options.links
+            links: options.links || null
         }
         logger.debug(JSON.stringify(data))
         const result = await db.setBadgeData(project, name, "badge", data)

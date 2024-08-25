@@ -1,17 +1,16 @@
 {
   "imports": {
-    "hono": "jsr:@hono/hono@^4.5.8",
+    "hono": "jsr:@hono/hono",
     "badge-maker": "npm:badge-maker",
     "chanfana": "npm:chanfana",
     "zod": "npm:zod",
     "commander": "npm:commander",
-    "dotenv": "npm:dotenv",
     "@octokit/rest": "npm:@octokit/rest"
   },
   "tasks": {
-    "reset-cache": "deno cache jsr:@hono/hono@^4.5.8 npm:badge-maker npm:chanfana npm:zod npm:commander npm:dotenv --reload",
+    "lock": "deno cache main.ts --lock --reload",
     "start": "deno run -A --env-file=secrets/localdev.env main.ts",
-    "dev": "deno run --watch -A main.ts",
+    "dev": "deno run --watch --env-file=secrets/localdev.env -A main.ts",
     "deploy:prod": "deno run -A jsr:@deno/deployctl deploy --org=lorebooks.wiki --project=lorebooks-badges-api --prod",
     "deploy:preview": "deno run -A jsr:@deno/deployctl deploy --org=lorebooks.wiki --project=lorebooks-badges-api",
     "utils:users": "deno run -A --env-file=secrets/localdev.env ./utils/manage-api-users.ts",

@@ -1,9 +1,16 @@
 import { config } from "./config.ts";
 
-const kv = config.kvUrl !== undefined ? await Deno.openKv(config.kvUrl) : await Deno.openKv()
 export type RedirectTool = {
   redirectUrl?: string;
 };
+
+export const kv = async (kvUrl?: string) => {
+  if (kvUrl !== undefined) {
+    return await Deno.openKv(kvUrl)
+  } else {
+    return await Deno.openKv()
+  }
+}
 
 export type BadgeData = {
   label?: string;
@@ -16,33 +23,23 @@ export type BadgeData = {
 };
 export type DbResult = {
   type: "redirect" | "badge";
-  data: BadgeData
+  data: RedirectTool | BadgeData
 };
 
-export async function getStaticBadgeData(project: string, badgeName: string) {
+export async function getBadgeData(project: string, badgeName: string) {
+  const kvApi = await kv(config.kvUrl)
   try {
-    const data = await kv.get([`staticBadges`, project, badgeName])
-    const result: DbResult = data.value
+    const {value,versionstamp} = await kvApi.get([`staticBadges`, project, badgeName])
 
-    if (result == null) {
-        return {
-            ok: false,
-            type: null,
-            data: null,
-            versionStamp: null
-        }
-    }
     return {
       ok: true,
-      type: result.type,
-      data: result.data,
-      versionStamp: data.versionstamp
+      result: value,
+      versionStamp: versionstamp
     };
   } catch (error) {
     return {
       ok: false,
-      type: null,
-      data: null,
+      result: null,
       versionStamp: null,
       error
     }
@@ -50,8 +47,10 @@ export async function getStaticBadgeData(project: string, badgeName: string) {
 }
 
 export async function setBadgeData(project: string, badgeName: string, type: "redirect" | "badge", data: RedirectTool | BadgeData) {
+  const kvApi = await kv(config.kvUrl)
   try {
-    const kvResult = await kv.set([`staticBadges`, project, badgeName], {type, data});
+    const key = [`staticBadges`, project, badgeName]
+    const kvResult = await kvApi.set(key, {type, data});
     return {
       ok: kvResult.ok,
       versionStamp: kvResult.versionstamp
@@ -62,5 +61,18 @@ export async function setBadgeData(project: string, badgeName: string, type: "re
       versionStamp: null,
       error
     }
+  }
+}
+
+export async function resolveBadgeIcon(icon: string) {
+  const kvApi = await kv(config.kvUrl);
+  try {
+    const result = await kvApi.get(["badgeIcons", icon])
+    if (result.value == null && result.versionstamp == null) {
+      return null
+    }
+    return result.value
+  } catch (error) {
+    throw Error(error)
   }
 }

@@ -2,13 +2,12 @@
   "version": "3",
   "packages": {
     "specifiers": {
-      "jsr:@hono/hono@^4.5.8": "jsr:@hono/hono@4.5.8",
+      "jsr:@hono/hono": "jsr:@hono/hono@4.5.8",
       "npm:@octokit/rest": "npm:@octokit/rest@21.0.2_@octokit+core@6.1.2",
       "npm:@types/node": "npm:@types/node@18.16.19",
       "npm:badge-maker": "npm:badge-maker@4.0.0",
       "npm:chanfana": "npm:chanfana@2.0.4_zod@3.23.8",
       "npm:commander": "npm:commander@12.1.0",
-      "npm:dotenv": "npm:dotenv@16.4.5",
       "npm:zod": "npm:zod@3.23.8"
     },
     "jsr": {
@@ -177,10 +176,6 @@
         "integrity": "sha512-IiJwMC8rdZE0+xiEZHeru6YoONC4rfPMqGm2W85jMIbkFvv5nFTwJVFHam2eFrN6txmoUYFAFXiv8ICVeTO0MA==",
         "dependencies": {}
       },
-      "dotenv@16.4.5": {
-        "integrity": "sha512-ZmdL2rui+eB2YwhsWzjInR8LldtZHGDoQ1ugH85ppHKwpUHL7j7rN0Ti9NCnGiQbhaZ11FpR+7ao1dNsmduNUg==",
-        "dependencies": {}
-      },
       "js-yaml@4.1.0": {
         "integrity": "sha512-wpxZs9NoxZaJESJGIZTyDEaYpl0FKSA+FB9aJiyemKhMwkxQg63h4T1KJgUGHpTqPDNRcmmYLugrRjJlBtWvRA==",
         "dependencies": {
@@ -210,12 +205,11 @@
   "remote": {},
   "workspace": {
     "dependencies": [
-      "jsr:@hono/hono@^4.5.8",
+      "jsr:@hono/hono",
       "npm:@octokit/rest",
       "npm:badge-maker",
       "npm:chanfana",
       "npm:commander",
-      "npm:dotenv",
       "npm:zod"
     ]
   }

@@ -1,4 +1,5 @@
 import { Hono } from "hono"
+import { cors } from "hono/cors";
 import {fromHono} from "chanfana"
 import { makeBadge, ValidationError } from "badge-maker";
 import { config } from "./lib/config.ts";
@@ -7,6 +8,7 @@ import { generateSvg } from "./api/badges.ts";
 import { ping } from "./api/meta.ts";
 
 const app = new Hono()
+app.use(cors());
 const openapi = fromHono(app, {
   schema: {
     info: {
@@ -24,12 +26,11 @@ const openapi = fromHono(app, {
   },
   docs_url: "/docs",
 });
-openapi.get("/badges/:project/:badge_name", generateSvg)
+openapi.get("/badges/:project/:badgeName", generateSvg)
 openapi.get("/ping", ping)
 
 app.get('/', (c) => {
   return c.redirect(config.homepage)
 })
-app.use(openapi)
 
 Deno.serve({ port: config.port }, app.fetch)
