@@ -3,7 +3,7 @@ import { cors } from "hono/cors";
 import {fromHono} from "chanfana"
 import { makeBadge, ValidationError } from "badge-maker";
 import { config } from "./lib/config.ts";
-import { servers, tags } from "./lib/metadata.ts";
+import { servers, tags, description, contact } from "./lib/metadata.ts";
 import { generateSvg } from "./api/badges.ts";
 import { ping } from "./api/meta.ts";
 
@@ -14,15 +14,21 @@ const openapi = fromHono(app, {
     info: {
       version: "0.1.0",
       title: "Badges API for lorebooks.wiki",
+      description,
       termsOfService:
         "https://github.com/lorebooks-wiki/badges-api/blob/main/docs/api-terms.md",
       license: {
         name: "AGPL-3.0",
-        url: "https://github.com/andreijiroh-dev/api-servers/raw/main/LICENSE",
+        url: "https://github.com/lorebooks-wiki/badges-api/blob/main/LICENSE",
       },
+      contact,
     },
     servers,
     tags,
+    externalDocs: {
+      url: "https://github.com/lorebooks-wiki/badges-api/tree/main/docs",
+      description: "More docuemntation available in GitHub repository"
+    },
   },
   docs_url: "/docs",
 });

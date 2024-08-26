@@ -13,20 +13,29 @@ export const kv = async (kvUrl?: string) => {
 }
 
 export type BadgeData = {
-  label?: string;
+  label?: string | null;
   message: string;
-  labelColor?: string;
-  color?: string;
-  logo?: string;
-  links?: Array<string>;
+  labelColor?: string | null;
+  color?: string | null;
+  logo?: string | null;
+  links?: Array<string> | null;
   style: "plastic" | "flat" | "flat-square" | "for-the-badge" | "social";
 };
+
+export type BadgeMakerParams = BadgeData & {
+  logoBase64?: string | null
+};
 export type DbResult = {
-  type: "redirect" | "badge";
-  data: RedirectTool | BadgeData
+  ok: boolean;
+  result: {
+    type: "redirect" | "badge";
+    data: RedirectTool & BadgeData;
+  } | null;
+  versionStamp: string | null,
+  error?: string | object
 };
 
-export async function getBadgeData(project: string, badgeName: string) {
+export async function getBadgeData(project: string, badgeName: string): Promise<DbResult> {
   const kvApi = await kv(config.kvUrl)
   try {
     const {value,versionstamp} = await kvApi.get([`staticBadges`, project, badgeName])
@@ -67,7 +76,7 @@ export async function setBadgeData(project: string, badgeName: string, type: "re
 export async function resolveBadgeIcon(icon: string) {
   const kvApi = await kv(config.kvUrl);
   try {
-    const result = await kvApi.get(["badgeIcons", icon])
+    const result = await kvApi.get<string|null>(["badgeIcons", icon])
     if (result.value == null && result.versionstamp == null) {
       return null
     }

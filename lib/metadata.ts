@@ -9,8 +9,7 @@ export const tags = [
 
 export const contact = {
     name: "Recap Time Squad",
-    email: "squad@crew.recaptime.dev",
-    url: "https://"
+    url: "https://github.com/lorebooks-wiki/badges-api/issues"
 }
 
 export const servers = [
@@ -27,3 +26,11 @@ export const servers = [
     description: "Development instance",
   },
 ];
+
+export const description = `\
+**lorebooks.wiki Badges API** is the badge hosting service by [Andrei Jiroh](https://andreijiroh.xyz) of [Recap Time Squad](https://recaptime.dev) during \
+[Arcade 2024](https://hackclub.com/arcade). It's still experimental, but the Deno KV storage backend and \`/badges/{project}/{badgeName}\` endpoint works.
+
+If you want to add a new logo or even a static badge for you or your project without the long \`img.shields.io\` URLs, please file a issue through the \
+contact link below.
+`
