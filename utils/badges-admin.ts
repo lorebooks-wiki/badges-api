@@ -1,10 +1,12 @@
 import { logger, setLogLevel } from "../lib/cli/logger.ts";
-import { config } from "../lib/config.ts";
+import { config, } from "../lib/config.ts";
 import { program } from "commander";
 import * as db from "../lib/db.ts"
 import type { RedirectTool, BadgeData} from "../lib/db.ts"
-import { OK } from "zod";
-const kvApi = await Deno.openKv(config.kvUrl);
+import { makeBadge } from "badge-maker";
+import { optional } from "zod";
+import { Format } from "./types.ts";
+const kvApi = await db.kv(config.kvUrl)
 
 program
   .description("manage badge icons and badge data stored over Deno KV")
@@ -20,7 +22,7 @@ program
 
 program
     .command("icons:upload")
-    .aliases(["upload-icon","icons:add"])
+    .aliases(["upload-icon","icons:add", "icons:set"])
     .description("add base64-encoded image to KV")
     .argument("<iconName>", "icon name")
     .argument("<base64Data>", "base64-encoded image/SVG data")
@@ -36,6 +38,7 @@ program
 
 program
     .command("icons:ls")
+    .aliases(["list-icons", "icons:show", "show-icons"])
     .action(async() => {
         try {
             const data = await kvApi.list<string>({
@@ -51,20 +54,35 @@ program
     })
 
 program
+    .command("icons:get")
+    .aliases(["get-icons"])
+    .argument("<iconName>", "badge icon name")
+    .action(async(iconName) => {
+      const data = await kvApi.get(["badgeIcons", iconName]);
+      logger.debug(JSON.stringify(data))
+      if (data.value != null && data.versionstamp != null) {
+        logger.info(data.value)
+      } else {
+        logger.warn(`badge icon with name ${iconName} may either not found or the KV value is blank`)
+      }
+    })
+
+program
   .command("badges:add")
   .argument("<project>", "project slug")
   .argument("<name>", "badge name")
   .requiredOption(
     "-t, --type <badge|redirect>",
     "whether to generate SVG at server-side or do a redirect",
-    "badge-data"
+    "badge"
   )
   .option("-u, --url <link>", "URL of the badge image to redirect into")
   .option("-m, --message <text>", "message")
-  .option("-c, --color", "messgae color", "lightgray")
-  .option("-lc, --label-color", "label color", "gray")
+  .option("-c, --color <color>", "messgae color", "lightgray")
+  .option("-lc, --label-color <color>", "label color", "gray")
   .option("-l, --label <text>", "badge label")
   .option("--links [links...]")
+  .option("-i, --logo <logoName>", "logo name")
   .option("-s, --style <style>", "badge style", "flat")
   .action(async (project, name, options) => {
     logger.debug(`options ${JSON.stringify(options)}`);
@@ -94,6 +112,18 @@ program
             style: options.style,
             links: options.links || null
         }
+
+        // try resolving the logo name first before commiting to KV
+        if (data.logo != null) {
+          const badgeIconData = (await kvApi.get(["badgeIcons", data.logo])).value;
+          logger.debug(`resolved icon data: ${badgeIconData}`)
+          if (badgeIconData == null) {
+            logger.error(`Cannot resolve logo name ${data.logo} from API`)
+            Deno.exit(1)
+          }
+        } 
+
+
         logger.debug(JSON.stringify(data))
         const result = await db.setBadgeData(project, name, "badge", data)
         logger.debug(JSON.stringify(result))
@@ -108,5 +138,41 @@ program
         }
     }
   });
+
+program
+  .command("resolve")
+  .argument("<project>")
+  .argument("<badge>")
+  .action(async(project, badge) => {
+    logger.debug(`namespace: ${project}/${badge}`)
+    const data = await kvApi.get(["staticBadges", project, badge]);
+    logger.debug(JSON.stringify(data))
+    const result = await data.value
+    if (result != null) {
+      if (result.type == "redirect") {
+        logger.info(result.data.redirectUrl)
+      } else {
+        const logoBase64 = result.data.logo != null ? (await kvApi.get(["badgeIcons", result.data.logo])).value : null
+        const badgeData = {
+          message: result.data.message,
+          style: result.data.style,
+          color: result.data.color
+        }
+
+        if (logoBase64 != null) Object.assign(badgeData, {logoBase64})
+        if (result.data.label != null) Object.assign(badgeData, {
+          label: result.data.label,
+          labelColor: result.data.labelColor
+        })
+
+        logger.debug(JSON.stringify(badgeData))
+
+        const badge = makeBadge(badgeData);
+        logger.info(badge)
+      }
+    } else {
+      logger.warn(`badge ${badge} for project ${project} does not exist in KV`)
+    }
+  })
 
 program.parse()

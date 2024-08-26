@@ -14,7 +14,9 @@
     "deploy:prod": "deno run -A jsr:@deno/deployctl deploy --org=lorebooks.wiki --project=lorebooks-badges-api --prod",
     "deploy:preview": "deno run -A jsr:@deno/deployctl deploy --org=lorebooks.wiki --project=lorebooks-badges-api",
     "utils:users": "deno run -A --env-file=secrets/localdev.env ./utils/manage-api-users.ts",
-    "utils:badges": "deno run -A --env-file=secrets/localdev.env ./utils/badges-admin.ts"
+    "utils:badges": "deno run -A --env-file=secrets/localdev.env ./utils/badges-admin.ts -d",
+    "icons:add": "deno task utils:badges icons:add",
+    "badges:add": "deno task utils:badges badges:add"
   },
   "compilerOptions": {
     "jsx": "precompile",
