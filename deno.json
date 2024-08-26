@@ -9,12 +9,12 @@
   },
   "tasks": {
     "lock": "deno cache main.ts --lock --reload",
-    "start": "deno run -A --env-file=secrets/localdev.env main.ts",
-    "dev": "deno run --watch --env-file=secrets/localdev.env -A main.ts",
+    "start": "deno run -A main.ts",
+    "dev": "deno run --watch -A main.ts",
     "deploy:prod": "deno run -A jsr:@deno/deployctl deploy --org=lorebooks.wiki --project=lorebooks-badges-api --prod",
     "deploy:preview": "deno run -A jsr:@deno/deployctl deploy --org=lorebooks.wiki --project=lorebooks-badges-api",
-    "utils:users": "deno run -A --env-file=secrets/localdev.env ./utils/manage-api-users.ts",
-    "utils:badges": "deno run -A --env-file=secrets/localdev.env ./utils/badges-admin.ts -d",
+    "utils:users": "deno run -A ./utils/manage-api-users.ts",
+    "utils:badges": "deno run -A ./utils/badges-admin.ts",
     "icons:add": "deno task utils:badges icons:add",
     "badges:add": "deno task utils:badges badges:add"
   },
