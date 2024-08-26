@@ -1,5 +1,7 @@
 # Badges API for lorebooks.wiki
 
+[![Built during Arcade 2024](https://badges.api.lorebooks.wiki/badges/hackclub/arcade?style=flat-square)](https://hackclub.com/arcade)
+
 It's like our own instance of `shields.io`, but hosted in Deno Deploy with:
 
 * `hono` and `chanfana` for API docs, validation and routing
