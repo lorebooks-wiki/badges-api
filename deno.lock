@@ -8,6 +8,9 @@
       "npm:badge-maker": "npm:badge-maker@4.0.0",
       "npm:chanfana": "npm:chanfana@2.0.4_zod@3.23.8",
       "npm:commander": "npm:commander@12.1.0",
+      "npm:joi": "npm:joi@17.13.3",
+      "npm:simple-icons": "npm:simple-icons@13.7.0",
+      "npm:svg-path-commander": "npm:svg-path-commander@2.0.10",
       "npm:zod": "npm:zod@3.23.8"
     },
     "jsr": {
@@ -21,6 +24,16 @@
         "dependencies": {
           "openapi3-ts": "openapi3-ts@4.3.3",
           "zod": "zod@3.23.8"
+        }
+      },
+      "@hapi/hoek@9.3.0": {
+        "integrity": "sha512-/c6rf4UJlmHlC9b5BaNvzAcFv7HZ2QHaV0D4/HNlBdvFnvQq8RI4kYdhyPCl7Xj+oWvTWQ8ujhqS53LIgAe6KQ==",
+        "dependencies": {}
+      },
+      "@hapi/topo@5.1.0": {
+        "integrity": "sha512-foQZKJig7Ob0BMAYBfcJk8d77QtOe7Wo4ox7ff1lQYoNNAb6jwcY1ncdoy2e9wQZzvNy7ODZCYJkK8kzmcAnAg==",
+        "dependencies": {
+          "@hapi/hoek": "@hapi/hoek@9.3.0"
         }
       },
       "@octokit/auth-token@5.1.1": {
@@ -108,6 +121,24 @@
           "@octokit/openapi-types": "@octokit/openapi-types@22.2.0"
         }
       },
+      "@sideway/address@4.1.5": {
+        "integrity": "sha512-IqO/DUQHUkPeixNQ8n0JA6102hT9CmaljNTPmQ1u8MEhBo/R4Q8eKLN/vGZxuebwOroDB4cbpjheD4+/sKFK4Q==",
+        "dependencies": {
+          "@hapi/hoek": "@hapi/hoek@9.3.0"
+        }
+      },
+      "@sideway/formula@3.0.1": {
+        "integrity": "sha512-/poHZJJVjx3L+zVD6g9KgHfYnb443oi7wLu/XKojDviHy6HOEOA6z1Trk5aR1dGcmPenJEgb2sK2I80LeS3MIg==",
+        "dependencies": {}
+      },
+      "@sideway/pinpoint@2.0.0": {
+        "integrity": "sha512-RNiOoTPkptFtSVzQevY/yWtZwf/RxyVnPy/OcA9HBM3MlGDnBEYL5B41H0MTn0Uec8Hi+2qUtTfG2WWZBmMejQ==",
+        "dependencies": {}
+      },
+      "@thednp/dommatrix@2.0.7": {
+        "integrity": "sha512-d5p07ZYa1Z6opXIGwKpBVvzxQity43T0kVnDXMbZNsMzaOrJGKtemRJA8Puj2GtvWQ5+JiNPkiwBWSk6plLVtA==",
+        "dependencies": {}
+      },
       "@types/node@18.16.19": {
         "integrity": "sha512-IXl7o+R9iti9eBW4Wg2hx1xQDig183jj7YLn8F7udNceyfkbn1ZxmzZXuak20gR40D7pIkIY1kYGx5VIGbaHKA==",
         "dependencies": {}
@@ -176,6 +207,16 @@
         "integrity": "sha512-IiJwMC8rdZE0+xiEZHeru6YoONC4rfPMqGm2W85jMIbkFvv5nFTwJVFHam2eFrN6txmoUYFAFXiv8ICVeTO0MA==",
         "dependencies": {}
       },
+      "joi@17.13.3": {
+        "integrity": "sha512-otDA4ldcIx+ZXsKHWmp0YizCweVRZG96J10b0FevjfuncLO1oX59THoAmHkNubYJ+9gWsYsp5k8v4ib6oDv1fA==",
+        "dependencies": {
+          "@hapi/hoek": "@hapi/hoek@9.3.0",
+          "@hapi/topo": "@hapi/topo@5.1.0",
+          "@sideway/address": "@sideway/address@4.1.5",
+          "@sideway/formula": "@sideway/formula@3.0.1",
+          "@sideway/pinpoint": "@sideway/pinpoint@2.0.0"
+        }
+      },
       "js-yaml@4.1.0": {
         "integrity": "sha512-wpxZs9NoxZaJESJGIZTyDEaYpl0FKSA+FB9aJiyemKhMwkxQg63h4T1KJgUGHpTqPDNRcmmYLugrRjJlBtWvRA==",
         "dependencies": {
@@ -186,6 +227,16 @@
         "integrity": "sha512-LKkzBGJcZ6wdvkKGMoSvpK+0cbN5Xc3XuYkJskO+vjEQWJgs1kgtyUk0pjf8KwPuysv323Er62F5P17XQl96Qg==",
         "dependencies": {
           "yaml": "yaml@2.5.0"
+        }
+      },
+      "simple-icons@13.7.0": {
+        "integrity": "sha512-vEBRehBv/DSypfBGx0Dqplch1Ik2sQidebLeAWoaXxZTZiiw1JPRpk9/GwQh1+I8vRHhzIRIcQ7Ng8hm4hB01A==",
+        "dependencies": {}
+      },
+      "svg-path-commander@2.0.10": {
+        "integrity": "sha512-DGYaXpW6cD0ML3Qj/Md/2al4p44wm/THVQMd2wL5w5LlbFWM/iU8BMvWjUDRzJXe8tpQG3LVsuEQftzdjQE+Vg==",
+        "dependencies": {
+          "@thednp/dommatrix": "@thednp/dommatrix@2.0.7"
         }
       },
       "universal-user-agent@7.0.2": {
@@ -202,7 +253,16 @@
       }
     }
   },
-  "remote": {},
+  "remote": {
+    "https://raw.githubusercontent.com/badges/shields/master/badge-maker/lib/color.js": "542c9dadf980bf51e3ebd9cd44e95f412df06d840f6945763ed74d9db6746f09",
+    "https://raw.githubusercontent.com/badges/shields/master/badge-maker/lib/constants.js": "1b9efc88dfa0860c015e84a6895e29659157aba3a989e1aafd5e6d7cb5892d02",
+    "https://raw.githubusercontent.com/badges/shields/master/core/base-service/coalesce-badge.js": "3253ea4f12bb35387b780670bff0a75b772c8ef3629b7410fe70394029c2fe91",
+    "https://raw.githubusercontent.com/badges/shields/master/core/base-service/coalesce.js": "235b3cb5cf053c9f6525fd3884925665c56ab66a53e93c5b8c71a9959ebc4d7e",
+    "https://raw.githubusercontent.com/badges/shields/master/core/base-service/to-array.js": "3066cafdaec85839bfb4e9fbb977eed999b9a770a2bede38de71e59842e822b3",
+    "https://raw.githubusercontent.com/badges/shields/master/lib/load-simple-icons.js": "effbf6cce63789ba029a32fc86c21dbe3427a90f503de818d6d2f0a15d65731f",
+    "https://raw.githubusercontent.com/badges/shields/master/lib/logos.js": "cc18c8d46a1b5f77ea8672a4fec53c883282fd32fa5390cff5e7ddd86639d530",
+    "https://raw.githubusercontent.com/badges/shields/master/lib/svg-helpers.js": "eb35b257ff8fabb5c497ec92756a0c8de4fa301ddc3849a18cea06b2e2dff28f"
+  },
   "workspace": {
     "dependencies": [
       "jsr:@hono/hono",
@@ -210,6 +270,9 @@
       "npm:badge-maker",
       "npm:chanfana",
       "npm:commander",
+      "npm:joi",
+      "npm:simple-icons",
+      "npm:svg-path-commander",
       "npm:zod"
     ]
   }

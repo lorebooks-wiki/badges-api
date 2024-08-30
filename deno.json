@@ -5,33 +5,41 @@
     "chanfana": "npm:chanfana",
     "zod": "npm:zod",
     "commander": "npm:commander",
-    "@octokit/rest": "npm:@octokit/rest"
+    "@octokit/rest": "npm:@octokit/rest",
+    "@badges/shields/": "https://raw.githubusercontent.com/badges/shields/master/",
+    "joi": "npm:joi",
+    "svg-path-commander": "npm:svg-path-commander",
+    "simple-icons": "npm:simple-icons"
   },
   "tasks": {
     "lock": "deno cache main.ts --lock --reload",
     "start": "deno run -A main.ts",
     "dev": "deno run --watch -A main.ts",
+    "seed": "deno run -A ./utils/preseed-kv.ts",
     "deploy:prod": "deno run -A jsr:@deno/deployctl deploy --org=lorebooks.wiki --project=lorebooks-badges-api --prod",
     "deploy:preview": "deno run -A jsr:@deno/deployctl deploy --org=lorebooks.wiki --project=lorebooks-badges-api",
     "utils:users": "deno run -A ./utils/manage-api-users.ts",
+    "admins:add": "deno task utils:users admins:add",
+    "admins:rm": "deno task utils:users admins:rm",
+    "admins:ls": "deno task utils:users admins:ls",
+    "admins:info": "deno task utils:users admins:info",
     "utils:badges": "deno run -A ./utils/badges-admin.ts",
     "icons:add": "deno task utils:badges icons:add",
-    "badges:add": "deno task utils:badges badges:add"
+    "icons:ls": "deno task utils:badges icons:ls",
+    "icons:get": "deno task utils:badges icons:get",
+    "badges:add": "deno task utils:badges badges:add",
+    "badges:get": "deno task utils:badges badges:get"
   },
   "compilerOptions": {
     "jsx": "precompile",
-    "jsxImportSource": "hono/jsx"
+    "jsxImportSource": "hono/jsx",
+    "allowJs": true
   },
   "deploy": {
     "project": "6bbdce0d-80f3-43dc-b1fe-59adca47e89f",
-    "exclude": [
-      "**/node_modules"
-    ],
+    "exclude": ["**/node_modules"],
     "include": [],
     "entrypoint": "main.ts"
   },
-  "unstable": [
-    "kv",
-    "bare-node-builtins"
-  ]
+  "unstable": ["kv", "bare-node-builtins"]
 }
