@@ -1,10 +1,18 @@
 import { program } from "commander"
 import { Octokit } from "@octokit/rest";
 import { logger, setLogLevel } from "../lib/cli/logger.ts";
+import { config } from "../lib/config.ts";
+
+const {authServiceToken, org, team_slug} = config.github
+
+if (authServiceToken == undefined) {
+  logger.warn(`You need a GitHub API token (GITHUB_TOKEN) to use most CLI commands here.`)
+  Deno.exit(1)
+}
 
 const ghApi = new Octokit({
-    auth: Deno.env.get("GITHUB_TOKEN"),
-    userAgent: "badges.api.lorebooks.wiki"
+    auth: authServiceToken,
+    userAgent: "badges.api.lorebooks.wiki/admin-cli"
 })
 
 program
@@ -27,8 +35,8 @@ program
     .action(async(username) => {
         try {
             const {data, headers} = await ghApi.teams.addOrUpdateMembershipForUserInOrg({
-                org: "lorebooks-wiki",
-                team_slug: "api-admins",
+                org,
+                team_slug,
                 username,
             })
             logger.debug(`response headers: ${JSON.stringify(headers)}`);
@@ -60,15 +68,15 @@ program
   .action(async(username, options) => {
     try {
         const rmFromTeam = await ghApi.teams.removeMembershipForUserInOrg({
-            org: "lorebooks-wiki",
-            team_slug: "api-admins",
+            org,
+            team_slug,
             username
         })
         logger.debug(`response headers: ${JSON.stringify(rmFromTeam.headers)}`);
         logger.debug(`response data: ${JSON.stringify(rmFromTeam.data)}`);
         if (options.removeFromOrg == true) {
             const rmFromOrg = await ghApi.orgs.removeMembershipForUser({
-                org: "lorebooks-wiki",
+                org,
                 username
             })
             logger.debug(
@@ -80,33 +88,73 @@ program
             logger.success(`Successfully removed @${username} from @lorebooks-wiki/api-admins team.`)
         }
     } catch (err) {
-        logger.debug(
-            `response headers: ${JSON.stringify(err.response.headers)}`
-        );
+      logger.debug(`response headers: ${JSON.stringify(err.response.headers)}`);
+      if (err.status == "404") {
+        logger.warn(`user ${username} is not in organization`)
+      } else {
         logger.error(
-            "Something gone wrong while calling the GitHub API (maybe check GITHUB_TOKEN?)"
+          "Something gone wrong while calling the GitHub API (maybe check GITHUB_TOKEN?)"
         );
         logger.info(
-            `response data: ${JSON.stringify(err.response.data)}`
+          `response data: ${JSON.stringify(err.response.data)}`
         );
         Deno.exit(1);
+      }
     }
   })
 
 program
   .command("admins:ls")
   .aliases(["list-admins", "admins:list"])
-  .description("Show list of API admins")
+  .description("Show list of API admins by GitHub usernames")
   .action(async() => {
     let member = ``
     const {data,headers} = await ghApi.teams.listMembersInOrg({
-        org: "lorebooks-wiki",
-        team_slug: "api-admins",
+        org,
+        team_slug,
         per_page: 500
     })
     data.forEach((user) => member += `${user.login}\n`)
     logger.debug(`response headers: ${JSON.stringify(headers)}`);
     logger.info(member)
+  })
+
+program
+  .command("admins:info")
+  .description("Get a information about an API admin")
+  .argument("<username>")
+  .action(async(username) => {
+    try {
+      const user = await ghApi.users.getByUsername({
+        username
+      })
+      logger.info(`user id: ${user.data.id}`);
+      logger.info(`graphql node id: ${user.data.node_id}`);
+
+      const teamMembership = await ghApi.teams.getMembershipForUserInOrg({
+        org,
+        team_slug,
+        username
+      })
+      logger.info(`membership status: ${teamMembership.data.state}`),
+      logger.info(`team role: ${teamMembership.data.role}`)
+    } catch (err) {
+      if (err.status == "404") {
+        logger.warn(`membership status: not in team or org`)
+        logger.warn(`team role: none`)
+      } else {
+        logger.debug(
+        `response headers: ${JSON.stringify(err.response.headers)}`
+        );
+        logger.error(
+          "Something gone wrong while calling the GitHub API (maybe check GITHUB_TOKEN?)"
+        );
+        logger.info(
+          `response data: ${JSON.stringify(err.response.data)}`
+        );
+        Deno.exit(1);
+        }
+    }
   })
 
 program.parse()
