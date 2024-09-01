@@ -1,6 +1,7 @@
 import { config } from "./config.ts";
 
 export const kv = async (kvUrl?: string) => {
+  console.log(`loading KV from ${config.kvUrl || "local backend"}`);
   if (kvUrl !== undefined) {
     return await Deno.openKv(kvUrl);
   } else {
@@ -84,6 +85,9 @@ export async function setBadgeData(
 
 export async function resolveBadgeIcon(icon: string) {
   const kvApi = await kv(config.kvUrl);
+  if (icon == null) {
+    return null;
+  }
   try {
     const result = await kvApi.get<string | null>(["badgeIcons", icon]);
     if (result.value == null && result.versionstamp == null) {
