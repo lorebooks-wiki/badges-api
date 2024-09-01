@@ -69,6 +69,10 @@ including \`logo\` (not \`logoBase64\` for abuse prevention) and \`style\`.
 
   async handle(c: Context) {
     const apiReqData = await this.getValidatedData<typeof this.schema>();
+    const reqUrl = new URL(c.req.url);
+    const { origin } = reqUrl;
+    const { color, links, style } = apiReqData.query;
+
     try {
       const acceptCT = c.req.header("Accept");
       const dbData = await getBadgeData(
@@ -76,24 +80,6 @@ including \`logo\` (not \`logoBase64\` for abuse prevention) and \`style\`.
         apiReqData.params.badgeName
       );
       console.log(dbData);
-      const {
-        type,
-        data,
-      }: {
-        type: "redirect" | "badge" | undefined;
-        data: BadgeData | undefined;
-      } = dbData.result;
-
-      type overridesData = {
-        logoColor?: string;
-        logoSize?: string;
-        logo?: string;
-      };
-      const overrides: overridesData = {
-        logoColor: apiReqData.params.logoColor || "white",
-        logoSize: apiReqData.params.logoSize,
-        logo: apiReqData.params.logo || data.logo,
-      };
 
       if (
         apiReqData.query.json == true ||
@@ -124,21 +110,35 @@ including \`logo\` (not \`logoBase64\` for abuse prevention) and \`style\`.
         });
       }
 
+      const {
+        type,
+        data,
+      }: {
+        type: "redirect" | "badge" | null;
+        data: BadgeData | null;
+      } = dbData.result;
+
       if (type == "redirect") {
+        if (typeof data?.redirectUrl == "string") {
+          let baseString = data.redirectUrl;
+          if (baseString.startsWith("/badges/"))
+            baseString = `${origin}${data.redirectUrl}`;
+          const urlParamsOps = new URL(baseString);
+          for (const param in apiReqData.query) {
+            if (param == "style" && apiReqData.query.style == undefined) {
+              urlParamsOps.searchParams.append("style", "flat");
+            } else {
+              urlParamsOps.searchParams.append(param, apiReqData.query[param]);
+            }
+          }
+          return c.redirect(urlParamsOps.toString());
+        }
         return c.redirect(
-          data?.redirectUrl !== undefined
-            ? data?.redirectUrl
-            : "https://badges.api.lorebooks.wiki/badges/notfound/notfound"
+          "https://badges.api.lorebooks.wiki/badges/notfound/notfound"
         );
       } else if (type == "badge") {
-        console.log(`logo name: ${data.logo}`);
-        let logoData: string | null;
-
-        if (data?.logo?.startsWith("data:")) {
-          logoData = await resolveBadgeIcon(data.logo);
-        } else {
-          logoData = makeLogo(data.logo, overrides);
-        }
+        console.log(`logo name: ${data?.logo || null}`);
+        const logoData = await resolveBadgeIcon(data?.logo);
         console.log(`logo data - ${logoData}`);
         let badgeData: Format = {
           message: data.message,
@@ -155,8 +155,13 @@ including \`logo\` (not \`logoBase64\` for abuse prevention) and \`style\`.
             logoBase64: logoData,
           });
         }
+        if (Array.isArray(data?.links)) {
+          Object.assign(badgeData, {
+            links: data.links,
+          });
+        }
 
-        let badge = makeBadge(badgeData);
+        const badge = makeBadge(badgeData);
         return c.newResponse(badge, 200, {
           "Content-Type": "image/svg+xml",
         });
