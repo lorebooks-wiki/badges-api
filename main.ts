@@ -6,9 +6,18 @@ import { config } from "./lib/config.ts";
 import { servers, tags, description, contact } from "./lib/metadata.ts";
 import { generateSvg, hcbBalanceOps, hcbDonateButton } from "./api/badges.ts";
 import { ping } from "./api/meta.ts";
+import { cache } from "hono/cache";
 
 const app = new Hono();
 app.use(cors());
+app.get(
+  "*",
+  cache({
+    cacheName: "badgesApiSvg",
+    cacheControl: "max-age=900",
+    wait: true,
+  })
+);
 const openapi = fromHono(app, {
   schema: {
     info: {
