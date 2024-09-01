@@ -4,16 +4,120 @@ import { z } from "zod";
 import { BadgeData, getBadgeData, resolveBadgeIcon } from "../lib/db.ts";
 import { Format, makeBadge } from "badge-maker";
 import { makeLogo } from "../lib/logos.ts";
+import { getOrgData } from "../lib/hcb.ts";
 
 export class hcbBalanceOps extends OpenAPIRoute {
   schema = {
-    tags: ["badges"],
+    tags: ["hcb"],
     summary: "Generate a SVG badge of a HCB organization's balances",
     descritpion: `\
 By default without the \`org\` query parameter, it will uses data from [Hack Club HQ](https://hcb.hackclub.com/api/v3/organizations/hq),
 but it will change to either \`recaptime-dev\` or \`lorebooks-wiki\` in the future.    
 `,
+    request: {
+      query: z.object({
+        org: Str({
+          description: "Organization slug or ID",
+          required: false,
+          default: "hq",
+        }),
+        style: Str({
+          description: "Badge style as supported by `badge-maker` npm library.",
+          required: false,
+          default: "flat",
+        }),
+      }),
+    },
+    responses: {
+      "200": {
+        content: {
+          "image/svg+xml": {
+            schema: {
+              type: "string",
+            },
+          },
+        },
+      },
+    },
   };
+
+  async handle(c: Context) {
+    const apiReqData = await this.getValidatedData<typeof this.schema>();
+    const { org, style } = apiReqData.query;
+    const { result, code } = await getOrgData(org || "hq");
+    console.log(`API result: ${JSON.stringify(result)} | code is ${code}`);
+
+    if (code == 200) {
+      const bal = result.balances.balance_cents / 100;
+      const badge: Format = {
+        label: `HCB balance for ${org}`,
+        labelColor: "EC3750",
+        message: `USD ${bal}`,
+        logoBase64: await resolveBadgeIcon("hcb-dark"),
+        style: style || "flat",
+      };
+      const badgeSvg = makeBadge(badge);
+      return c.newResponse(badgeSvg, 200, {
+        "Content-Type": "image/svg+xml",
+      });
+    }
+  }
+}
+
+export class hcbDonateButton extends OpenAPIRoute {
+  schema = {
+    tags: ["hcb"],
+    summary: "Generate a SVG badge of a HCB organization's balances",
+    descritpion: `\
+By default without the \`org\` query parameter, it will uses data from [Hack Club HQ](https://hcb.hackclub.com/api/v3/organizations/hq),
+but it will change to either \`recaptime-dev\` or \`lorebooks-wiki\` in the future.    
+`,
+    request: {
+      query: z.object({
+        org: Str({
+          description: "Organization slug or ID",
+          required: false,
+          default: "hq",
+        }),
+        style: Str({
+          description: "Badge style as supported by `badge-maker` npm library.",
+          required: false,
+          default: "flat",
+        }),
+      }),
+    },
+    responses: {
+      "200": {
+        content: {
+          "image/svg+xml": {
+            schema: {
+              type: "string",
+            },
+          },
+        },
+      },
+    },
+  };
+
+  async handle(c: Context) {
+    const apiReqData = await this.getValidatedData<typeof this.schema>();
+    const { org, style } = apiReqData.query;
+    const dbData = (await getBadgeData("hcb", "donate")).result?.data;
+    const badgeData: Format = {
+      label: dbData?.label,
+      labelColor: dbData?.labelColor,
+      logoBase64: await resolveBadgeIcon("hcb-dark"),
+      message: `Donate to ${org || "HQ"}`,
+      links: [
+        `https://hcb.hackclub.com/donations/start/${org || "hq"}`,
+        `https://hcb.hackclub.com/donations/start/${org || "hq"}`,
+      ],
+    };
+    const badge = makeBadge(badgeData);
+    return c.newResponse(badge, 200, {
+      "Content-Type": "image/svg+xml",
+    });
+  }
 }
 
 export class generateSvg extends OpenAPIRoute {
