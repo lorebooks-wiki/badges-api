@@ -13,5 +13,9 @@
     "global"
   ],
   "conventionalCommits.promptCI": true,
+  "conventionalCommits.emojiFormat": "code",
+  "editor.colorDecoratorsLimit": 50000,
+  "editor.formatOnPaste": true,
+  "editor.formatOnSave": true,
   "conventionalCommits.emojiFormat": "code"
 }
