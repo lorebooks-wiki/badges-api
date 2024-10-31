@@ -5,7 +5,7 @@
     "chanfana": "npm:chanfana",
     "zod": "npm:zod",
     "commander": "npm:commander",
-    "@octokit/rest": "npm:@octokit/rest",
+    "@octokit/rest": "npm:@octokit/rest@^21.0.2",
     "@badges/shields/": "https://raw.githubusercontent.com/badges/shields/master/",
     "joi": "npm:joi",
     "svg-path-commander": "npm:svg-path-commander",
