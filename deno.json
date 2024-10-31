@@ -38,7 +38,6 @@
   "deploy": {
     "project": "6bbdce0d-80f3-43dc-b1fe-59adca47e89f",
     "exclude": ["**/node_modules"],
-    "include": [],
     "entrypoint": "main.ts"
   },
   "unstable": ["kv", "bare-node-builtins"]
