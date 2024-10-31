@@ -10,6 +10,14 @@ export const tags = [
     description:
       "HCB badges for use by organizations and communties fiscally sponsored by Hack Club through HCB",
   },
+  {
+    name: "admin",
+    description: "Admin APi endpoints, protected by GitHub PAT authenication."
+  },
+  {
+    name: "meta",
+    description: "Service meta endpoints"
+  }
 ];
 
 export const contact = {
@@ -28,9 +36,10 @@ export const servers = [
   },
   {
     url: `http://localhost:${config.port}`,
-    description: "Development instance",
+    description: "Development instance (local host)",
   },
 ];
+
 
 export const description = `\
 **lorebooks.wiki Badges API** is the badge hosting service by [Andrei Jiroh](https://andreijiroh.xyz) of [Recap Time Squad](https://recaptime.dev) during \

@@ -3,8 +3,9 @@ import { Context } from "hono";
 import { z } from "zod";
 
 export class ping extends OpenAPIRoute {
-  schema = {
+  override schema = {
     description: "Pings the server if still up.",
+    tags: ["meta"],
     responses: {
       "200": {
         description: "Everything seems to be up",
@@ -19,7 +20,7 @@ export class ping extends OpenAPIRoute {
     },
   };
 
-  async handle(c: Context) {
+  override handle(c: Context) {
     return c.json({
       ok: true,
       result: "Everything is up",

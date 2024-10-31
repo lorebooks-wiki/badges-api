@@ -10,7 +10,7 @@ import { validateBadgeStyle } from "../lib/utils.ts";
  * Get a HCB balance badge
  */
 export class hcbBalanceOps extends OpenAPIRoute {
-  schema = {
+  override schema = {
     tags: ["hcb"],
     summary: "Generate a SVG badge of a HCB organization's balances",
     description: `\
@@ -48,7 +48,7 @@ in USD.
     },
   };
 
-  async handle(c: Context) {
+  override async handle(c: Context) {
     const apiReqData = await this.getValidatedData<typeof this.schema>();
     const { org, style } = apiReqData?.query;
     const { result, code } = await getOrgData(org || "hq");
@@ -86,7 +86,7 @@ in USD.
 }
 
 export class hcbDonateButton extends OpenAPIRoute {
-  schema = {
+  override schema = {
     tags: ["hcb"],
     summary: "Generate a SVG badge for HCB donate badges.",
     description: `\
@@ -124,7 +124,7 @@ so it is easily clickable when added as a SVG object.
     },
   };
 
-  async handle(c: Context) {
+  override async handle(c: Context) {
     const apiReqData = await this.getValidatedData<typeof this.schema>();
     const { org, style } = apiReqData.query;
     const dbData = (await getBadgeData("hcb", "donate")).result?.data;
@@ -154,7 +154,7 @@ so it is easily clickable when added as a SVG object.
 }
 
 export class generateSvg extends OpenAPIRoute {
-  schema = {
+  override schema = {
     tags: ["badges"],
     summary: "Generate a SVG badge based on stored badge data on Deno KV.",
     description: `\
@@ -204,7 +204,7 @@ including \`logo\` (not \`logoBase64\` for abuse prevention) and \`style\`.
     },
   };
 
-  async handle(c: Context) {
+  override async handle(c: Context) {
     const apiReqData = await this.getValidatedData<typeof this.schema>();
     const reqUrl = new URL(c.req.url);
     const { origin } = reqUrl;
