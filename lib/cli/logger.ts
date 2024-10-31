@@ -1,5 +1,5 @@
-const loggerPrefix = "@lorebooks-wiki/badges-api-utils"
-import { getColor, bold } from "./colors.ts";
+const loggerPrefix = "@lorebooks-wiki/badges-api-utils";
+import { bold, getColor } from "./colors.ts";
 
 const levels = {
   error: 0,
@@ -49,8 +49,9 @@ function log(level: string, message: string) {
 }
 
 export function formatMessage(level: string, message: string) {
-  const formattedMessage =
-    typeof message === "object" ? JSON.stringify(message) : message;
+  const formattedMessage = typeof message === "object"
+    ? JSON.stringify(message)
+    : message;
 
   switch (level.toLowerCase()) {
     // errors

@@ -10,12 +10,14 @@
     "github-actions",
     "issue-templates",
     "issue-forms",
-    "global"
+    "global",
+    "vscode"
   ],
   "conventionalCommits.promptCI": true,
   "conventionalCommits.emojiFormat": "code",
   "editor.colorDecoratorsLimit": 50000,
   "editor.formatOnPaste": true,
   "editor.formatOnSave": true,
-  "conventionalCommits.emojiFormat": "code"
+  "editor.formatOnType": false,
+  "dotenv.enableAutocloaking": false
 }

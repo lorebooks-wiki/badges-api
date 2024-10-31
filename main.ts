@@ -1,23 +1,42 @@
-import { Hono } from "hono";
+import { Context, Hono } from "hono";
 import { cors } from "hono/cors";
 import { fromHono } from "chanfana";
-import { makeBadge, ValidationError } from "badge-maker";
 import { config } from "./lib/config.ts";
-import { servers, tags, description, contact } from "./lib/metadata.ts";
+import { contact, description, servers, tags } from "./lib/metadata.ts";
 import { generateSvg, hcbBalanceOps, hcbDonateButton } from "./api/badges.ts";
 import { ping } from "./api/meta.ts";
 import { cache } from "hono/cache";
 
 const app = new Hono();
-app.use(cors());
-app.get(
-  "*",
-  cache({
-    cacheName: "badgesApiSvg",
-    cacheControl: "max-age=900",
-    wait: true,
-  })
-);
+app.use(cors({
+  origin: "*",
+  allowMethods: [
+    "GET",
+    "POST",
+    "PUT",
+    "DELETE",
+    "OPTIONS"
+  ],
+  credentials: true,
+  exposeHeaders: ["Content-Type", "Cache-Control"],
+  allowHeaders: ["ETag", "Authorization", "X-GitHub-PAT"]
+}));
+
+if (
+  Deno.env.get("DENO_DEPLOYMENT_ID") && Deno.env.get("DENO_REGION") ||
+  config.flags.edgeCache == "true"
+) {
+  console.log("enabling edge cache");
+  app.get(
+    "*",
+    cache({
+      cacheName: config.cacheNamespace,
+      cacheControl: "max-age=300",
+      wait: true,
+    }),
+  );
+}
+
 const openapi = fromHono(app, {
   schema: {
     info: {
@@ -47,8 +66,14 @@ openapi.get("/hcb/donate", hcbDonateButton);
 openapi.get("/badges/:project/:badgeName", generateSvg);
 openapi.get("/ping", ping);
 
-app.get("/", (c) => {
+app.get("/", (c: Context) => {
   return c.redirect(config.homepage);
 });
+
+app.get("/hcb/balances", (c: Context) => {
+  const baseOps = new URL(c.req.url)
+
+  return c.redirect(`/hcb/balance${baseOps.search ?? ''}`)
+})
 
 Deno.serve({ port: config.port }, app.fetch);

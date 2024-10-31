@@ -35,7 +35,7 @@ export type DbResult = {
 
 export async function getBadgeData(
   project: string,
-  badgeName: string
+  badgeName: string,
 ): Promise<DbResult> {
   const kvApi = await kv(config.kvUrl);
   try {
@@ -64,7 +64,7 @@ export async function setBadgeData(
   project: string,
   badgeName: string,
   type: "redirect" | "badge",
-  data: BadgeData
+  data: BadgeData,
 ) {
   const kvApi = await kv(config.kvUrl);
   try {

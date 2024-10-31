@@ -11,7 +11,7 @@ export class ping extends OpenAPIRoute {
         content: {
           "application/json": {
             schema: z.object({
-              ok: Bool({default: true}).default(true),
+              ok: Bool({ default: true }).default(true),
             }),
           },
         },

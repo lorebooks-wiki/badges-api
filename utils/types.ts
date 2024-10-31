@@ -1,5 +1,5 @@
 /*
- * Copied from badge-maker's makeBadge types 
+ * Copied from badge-maker's makeBadge types
  */
 export interface Format {
   label?: string;

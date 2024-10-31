@@ -2,7 +2,7 @@ import { logger, setLogLevel } from "../lib/cli/logger.ts";
 import { config } from "../lib/config.ts";
 import { program } from "commander";
 import * as db from "../lib/db.ts";
-import type { RedirectTool, BadgeData } from "../lib/db.ts";
+import type { BadgeData, RedirectTool } from "../lib/db.ts";
 import { makeBadge } from "badge-maker";
 const kvApi = await db.kv(config.kvUrl);
 
@@ -27,13 +27,13 @@ program
   .action(async (iconName: string, base64Data: string) => {
     if (base64Data.includes("data:@file/")) {
       logger.warn(
-        `Looks like you pasted something from base64.guru. Please change data:@file/ prefix with`
+        `Looks like you pasted something from base64.guru. Please change data:@file/ prefix with`,
       );
       logger.warn(`data:image/ in order for badge generation to work.`);
       Deno.exit(1);
     } else if (base64Data.startsWith("data:/svg+xml")) {
       logger.warn(
-        `Looks like you encoded a remote SVG file via base64.guru, but it should be image/svg+xml`
+        `Looks like you encoded a remote SVG file via base64.guru, but it should be image/svg+xml`,
       );
       Deno.exit(1);
     }
@@ -75,7 +75,7 @@ program
       logger.info(data.value);
     } else {
       logger.warn(
-        `badge icon with name ${iconName} may either not found or the KV value is blank`
+        `badge icon with name ${iconName} may either not found or the KV value is blank`,
       );
     }
   });
@@ -87,7 +87,7 @@ program
   .requiredOption(
     "-t, --type <badge|redirect>",
     "whether to generate SVG at server-side or do a redirect",
-    "badge"
+    "badge",
   )
   .option("-u, --url <link>", "URL of the badge image to redirect into")
   .option("-m, --message <text>", "message")
@@ -110,7 +110,7 @@ program
 
       if (result.ok == true) {
         logger.success(
-          `added redirect on https://badges.api.lorebooks.wiki/badges/${project}/${name}`
+          `added redirect on https://badges.api.lorebooks.wiki/badges/${project}/${name}`,
         );
       }
     }
@@ -146,7 +146,7 @@ program
         Deno.exit(1);
       } else {
         logger.success(
-          `Added/updated badge at https://badges.api.lorebooks.wiki/badges/${project}/${name}`
+          `Added/updated badge at https://badges.api.lorebooks.wiki/badges/${project}/${name}`,
         );
       }
     }
@@ -165,10 +165,9 @@ program
       if (result.type == "redirect") {
         logger.info(result.data.redirectUrl);
       } else {
-        const logoBase64 =
-          result.data.logo != null
-            ? (await kvApi.get(["badgeIcons", result.data.logo])).value
-            : null;
+        const logoBase64 = result.data.logo != null
+          ? (await kvApi.get(["badgeIcons", result.data.logo])).value
+          : null;
         const badgeData = {
           message: result.data.message,
           style: result.data.style,
@@ -176,11 +175,12 @@ program
         };
 
         if (logoBase64 != null) Object.assign(badgeData, { logoBase64 });
-        if (result.data.label != null)
+        if (result.data.label != null) {
           Object.assign(badgeData, {
             label: result.data.label,
             labelColor: result.data.labelColor,
           });
+        }
 
         logger.debug(JSON.stringify(badgeData));
 

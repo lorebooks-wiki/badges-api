@@ -1,6 +1,6 @@
 {
-    "recommendations": [
-        "denoland.vscode-deno",
-        "vivaxy.vscode-conventional-commits"
-    ]
+  "recommendations": [
+    "denoland.vscode-deno",
+    "vivaxy.vscode-conventional-commits"
+  ]
 }
