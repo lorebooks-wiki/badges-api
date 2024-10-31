@@ -1,4 +1,4 @@
-import { Context, Hono } from "hono";
+import { Context, Hono, Next } from "hono";
 import { cors } from "hono/cors";
 import { fromHono } from "chanfana";
 import { config } from "./lib/config.ts";
@@ -6,6 +6,9 @@ import { contact, description, servers, tags } from "./lib/metadata.ts";
 import { generateSvg, hcbBalanceOps, hcbDonateButton } from "./api/badges.ts";
 import { ping } from "./api/meta.ts";
 import { cache } from "hono/cache";
+import { testGitHubAuth } from "./api/admin.ts";
+import { bearerAuth } from 'hono/bearer-auth';
+import { handleGitHubAuth } from "./lib/githubAuth.ts";
 
 const app = new Hono();
 app.use(cors({
@@ -28,7 +31,15 @@ if (
 ) {
   console.log("enabling edge cache");
   app.get(
-    "*",
+    "/hcb/*",
+    cache({
+      cacheName: config.cacheNamespace,
+      cacheControl: "max-age=300",
+      wait: true,
+    }),
+  );
+  app.get(
+    "/badges/*",
     cache({
       cacheName: config.cacheNamespace,
       cacheControl: "max-age=300",
@@ -65,6 +76,27 @@ openapi.get("/hcb/balance", hcbBalanceOps);
 openapi.get("/hcb/donate", hcbDonateButton);
 openapi.get("/badges/:project/:badgeName", generateSvg);
 openapi.get("/ping", ping);
+
+// setup auth for admin api
+openapi.registry.registerComponent(
+  'securitySchemes',
+  'BearerAuth',
+  {
+    type: "http",
+    scheme: "bearer",
+  },
+)
+openapi.get("/admin/auth-test", testGitHubAuth)
+
+app.use("/admin/*", bearerAuth({
+  verifyToken: async (token: string, c: Context) => {
+    if (c.req.path == "/admin/auth-test") {
+      return true
+    } else {
+      return await handleGitHubAuth(token, true)
+    }
+  }
+}))
 
 app.get("/", (c: Context) => {
   return c.redirect(config.homepage);
