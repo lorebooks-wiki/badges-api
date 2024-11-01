@@ -1,7 +1,7 @@
+import { BadgeDataDbstore } from "../utils/types.ts";
 import { config } from "./config.ts";
 
 export const kv = async (kvUrl?: string) => {
-  console.log(`loading KV from ${config.kvUrl || "local backend"}`);
   if (kvUrl !== undefined) {
     return await Deno.openKv(kvUrl);
   } else {
@@ -30,7 +30,8 @@ export type DbResult = {
     data: BadgeData;
   } | null;
   versionStamp: string | null;
-  error?: string | object;
+  // deno-lint-ignore no-explicit-any
+  error?: any;
 };
 
 export async function getBadgeData(
@@ -39,7 +40,7 @@ export async function getBadgeData(
 ): Promise<DbResult> {
   const kvApi = await kv(config.kvUrl);
   try {
-    const { value, versionstamp } = await kvApi.get([
+    const { value, versionstamp } = await kvApi.get<BadgeDataDbstore>([
       `staticBadges`,
       project,
       badgeName,
