@@ -11,7 +11,8 @@
     "issue-templates",
     "issue-forms",
     "global",
-    "vscode"
+    "vscode",
+    "coderabbit"
   ],
   "conventionalCommits.promptCI": true,
   "conventionalCommits.emojiFormat": "code",
