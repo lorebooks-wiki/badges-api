@@ -2,7 +2,7 @@ import { logger, setLogLevel } from "../lib/cli/logger.ts";
 import { config } from "../lib/config.ts";
 import { program } from "commander";
 import * as db from "../lib/db.ts";
-import type { BadgeData, RedirectTool } from "../lib/db.ts";
+import type { BadgeData } from "../lib/db.ts";
 import { makeBadge } from "badge-maker";
 const kvApi = await db.kv(config.kvUrl);
 
@@ -27,13 +27,13 @@ program
   .action(async (iconName: string, base64Data: string) => {
     if (base64Data.includes("data:@file/")) {
       logger.warn(
-        `Looks like you pasted something from base64.guru. Please change data:@file/ prefix with`,
+        `Invalid base64 format: Found 'data:@file/' prefix.`,
       );
-      logger.warn(`data:image/ in order for badge generation to work.`);
+      logger.warn(`Expected format: 'data:image/<type>;base64,<data>' where type is png, jpeg, or svg+xml`);
       Deno.exit(1);
-    } else if (base64Data.startsWith("data:/svg+xml")) {
+    } else if (!base64Data.match(/^data:image\/(png|jpeg|svg\+xml);base64,/)) {
       logger.warn(
-        `Looks like you encoded a remote SVG file via base64.guru, but it should be image/svg+xml`,
+        `Invalid image format. Expected 'data:image/<type>;base64,' prefix`,
       );
       Deno.exit(1);
     }
@@ -103,7 +103,7 @@ program
       if (options.url == undefined) {
         logger.error(`you forgot to set --url option`);
       }
-      const data: RedirectTool = {
+      const data: BadgeData = {
         redirectUrl: options.url,
       };
       const result = await db.setBadgeData(project, name, "redirect", data);

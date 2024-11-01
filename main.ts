@@ -25,27 +25,19 @@ app.use(cors({
   allowHeaders: ["ETag", "Authorization", "X-GitHub-PAT"]
 }));
 
-if (
-  Deno.env.get("DENO_DEPLOYMENT_ID") && Deno.env.get("DENO_REGION") ||
-  config.flags.edgeCache == "true"
-) {
+function edgeCache(cacheName: string, cacheControl: string) {
+  return cache({
+    cacheName,
+    cacheControl,
+    wait: true,
+  });
+}
+
+// Usage in main.ts  
+if (Deno.env.get("DENO_DEPLOYMENT_ID") && Deno.env.get("DENO_REGION") || config.flags.edgeCache == true) {
   console.log("enabling edge cache");
-  app.get(
-    "/hcb/*",
-    cache({
-      cacheName: config.cacheNamespace,
-      cacheControl: "max-age=300",
-      wait: true,
-    }),
-  );
-  app.get(
-    "/badges/*",
-    cache({
-      cacheName: config.cacheNamespace,
-      cacheControl: "max-age=300",
-      wait: true,
-    }),
-  );
+  app.get("/hcb/*", edgeCache(config.cacheNamespace, "max-age=300"));
+  app.get("/badges/*", edgeCache(config.cacheNamespace, "max-age=300"));
 }
 
 const openapi = fromHono(app, {

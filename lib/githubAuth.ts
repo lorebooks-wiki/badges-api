@@ -7,7 +7,7 @@ const kvApi = await kv(config.kvUrl);
 const msgBuffer = (msg: string) => new TextEncoder().encode(msg);
 const github = (token: string) => new Octokit({
   auth: token,
-  userAgent: "@lorebooks-wiki/badges-api (https://github.com/lorebooks-wiki/badges-api"
+  userAgent: `@lorebooks-wiki/badges-api ${config.homepage}`
 })
 
 interface UserDataOps {
@@ -28,16 +28,24 @@ export async function handleGitHubAuth(token: string, adminEndpoint?: boolean) {
   let now = Date.now();
   let ttl = now + (5 * 60 * 1000);
   let fiveMinsAgo = now - (5 * 60 * 1000);
-  let authData: UserDataOps = {};
+  let authData: UserDataOps = {
+    id: null,
+    node_id: null,
+    teamMembership: {
+      status: null,
+      role: null,
+    },
+    expires_in: 0,
+  };
 
   try {
     const cachedAuthData = await kvApi.get<UserDataOps>(key);
 
     if (cachedAuthData.value == null) {
-      const user = await getAuthenicatedUser(token);
+      const user = await getAuthenticatedUser(token);
       const { status, role } = await checkTeamMembership(user.login || "missing-username")
 
-      if (status == null) {
+      if (status === null) {
         return false
       }
       authData = {
@@ -54,12 +62,12 @@ export async function handleGitHubAuth(token: string, adminEndpoint?: boolean) {
 
     } else {
       authData = cachedAuthData.value
-      if (fiveMinsAgo <= authData.expires_in || authData.expires_in === undefined) {
+      if (now >= authData.expires_in || authData.expires_in === undefined) {
         console.log(`[auth-checks] ttl elapsed for ${key.toString()}, updating record (current: ${fiveMinsAgo}, was: ${authData.expires_in})`)
-        const user = await getAuthenicatedUser(token);
+        const user = await getAuthenticatedUser(token);
         const { status, role } = await checkTeamMembership(user.login || "missing-username")
 
-        if (status == null) {
+        if (status === null) {
           return false
         }
         authData = {
@@ -77,7 +85,7 @@ export async function handleGitHubAuth(token: string, adminEndpoint?: boolean) {
       console.log(`[auth-checks] ttl not yet elapsed for ${key.toString()} (current: ${fiveMinsAgo}, was: ${cachedAuthData.value.expires_in})`)
     }
 
-    if (adminEndpoint == true && authData.teamMembership.status != "active") {
+    if (adminEndpoint === true && authData.teamMembership.status !== "active") {
       return false
     }
     return true
@@ -87,7 +95,7 @@ export async function handleGitHubAuth(token: string, adminEndpoint?: boolean) {
   }
 }
 
-async function getAuthenicatedUser(token: string) {
+async function getAuthenticatedUser(token: string) {
   try {
     const { data } = await github(token).users.getAuthenticated()
     return {
@@ -107,7 +115,7 @@ async function getAuthenicatedUser(token: string) {
 
 async function checkTeamMembership(username: string) {
   const { authServiceToken, org, team_slug } = config.github;
-  if (username == "missing-username") {
+  if (username === "missing-username") {
     return {
       status: null,
       role: null,
@@ -121,7 +129,7 @@ async function checkTeamMembership(username: string) {
       username
     })
 
-    if (status == 200) {
+    if (status === 200) {
       return { status: data.state, role: data.role };
     } else {
       return {

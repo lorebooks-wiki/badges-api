@@ -5,9 +5,9 @@ import { config } from "../lib/config.ts";
 
 const { authServiceToken, org, team_slug } = config.github;
 
-if (authServiceToken == undefined) {
+if (!authServiceToken?.match(/^(gh[prsou]|github_pat)_\w+$/)) {
   logger.warn(
-    `You need a GitHub API token (GITHUB_TOKEN) to use most CLI commands here.`,
+    `Invalid or missing GitHub token. Please set GITHUB_TOKEN with a valid GitHub token.`,
   );
   Deno.exit(1);
 }
