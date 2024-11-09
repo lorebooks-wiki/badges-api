@@ -8,11 +8,11 @@ export const tags = [
   {
     name: "hcb",
     description:
-      "HCB badges for use by organizations and communties fiscally sponsored by Hack Club through HCB",
+      "HCB badges for use by organizations and communties fiscally sponsored by Hack Club through the HCB platform.",
   },
   {
     name: "admin",
-    description: "Admin APi endpoints, protected by GitHub PAT authenication."
+    description: "Admin API endpoints, protected by GitHub PAT authentication. (experimential)"
   },
   {
     name: "meta",
@@ -42,8 +42,9 @@ export const servers = [
 
 
 export const description = `\
-**lorebooks.wiki Badges API** is the badge hosting service by [Andrei Jiroh](https://andreijiroh.xyz) of [Recap Time Squad](https://recaptime.dev) during \
-[Arcade 2024](https://hackclub.com/arcade). It's still experimental, but the Deno KV storage backend and \`/badges/{project}/{badgeName}\` endpoint works.
+**lorebooks.wiki Badges API** is the badge hosting service for Recap Time Squad's projects and friends by [Andrei Jiroh](https://andreijiroh.xyz) of [Recap Time Squad](https://recaptime.dev), \
+built during [Hack Club Arcade 2024](https://hackclub.com/arcade) (and continued in [High Seas](https://highseas.hackclub.com)). It is currently in public beta (excluding the \
+admin API, which is under development at the moment), but the Deno KV storage backend and \`/badges/{project}/{badgeName}\` and HCB-related badge endpoint works.
 
 If you want to add a new logo or even a static badge for you or your project without the long \`img.shields.io\` URLs, please file a issue through the \
 contact link below.

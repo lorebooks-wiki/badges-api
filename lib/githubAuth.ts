@@ -1,4 +1,4 @@
-import { config } from "./config.ts";
+import { config, getValidatedGithubToken } from "./config.ts";
 import { kv } from "./db.ts";
 import { encodeHex } from "jsr:@std/encoding/hex";
 import { Octokit } from "@octokit/rest";
@@ -21,7 +21,11 @@ interface UserDataOps {
   expires_in: number
 }
 
-export async function handleGitHubAuth(token: string, adminEndpoint?: boolean) {
+export async function handleGitHubAuth(
+  token: string,
+  adminEndpoint?: boolean,
+  forceCheck?: boolean
+) {
   const tokHash = await hashToken(token);
   const key = ["cachedGitHubTokenHash", tokHash];
   const expireIn = 300000;
@@ -41,7 +45,7 @@ export async function handleGitHubAuth(token: string, adminEndpoint?: boolean) {
   try {
     const cachedAuthData = await kvApi.get<UserDataOps>(key);
 
-    if (cachedAuthData.value == null) {
+    if (cachedAuthData.value == null || forceCheck == true) {
       const user = await getAuthenticatedUser(token);
       const { status, role } = await checkTeamMembership(user.login || "missing-username")
 
@@ -58,7 +62,7 @@ export async function handleGitHubAuth(token: string, adminEndpoint?: boolean) {
         expires_in: ttl
       }
 
-      await kvApi.set(key, authData)
+      await kvApi.set(key, authData, { expireIn })
 
     } else {
       authData = cachedAuthData.value
@@ -80,7 +84,7 @@ export async function handleGitHubAuth(token: string, adminEndpoint?: boolean) {
           expires_in: ttl
         }
 
-        await kvApi.set(key, authData)
+        await kvApi.set(key, authData, { expireIn })
       }
       console.log(`[auth-checks] ttl not yet elapsed for ${key.toString()} (current: ${fiveMinsAgo}, was: ${cachedAuthData.value.expires_in})`)
     }
@@ -147,8 +151,14 @@ async function checkTeamMembership(username: string) {
   }
 }
 
+/**
+ * Hash a GitHub token into SHA-215 encoded text.
+ * @param token Any string, but for this case, a GitHub token
+ * @returns 
+ */
 export async function hashToken(token: string) {
-  const msg = msgBuffer(token);
+  const validatedToken = getValidatedGithubToken(token)
+  const msg = msgBuffer(validatedToken);
   const hashBuff = await crypto.subtle.digest("SHA-512", msg);
   return encodeHex(hashBuff);
 }

@@ -5,13 +5,6 @@ import { config } from "../lib/config.ts";
 
 const { authServiceToken, org, team_slug } = config.github;
 
-if (!authServiceToken?.match(/^(gh[prsou]|github_pat)_\w+$/)) {
-  logger.warn(
-    `Invalid or missing GitHub token. Please set GITHUB_TOKEN with a valid GitHub token.`,
-  );
-  Deno.exit(1);
-}
-
 const ghApi = new Octokit({
   auth: authServiceToken,
   userAgent: "badges.api.lorebooks.wiki/admin-cli",
@@ -58,10 +51,16 @@ program
       logger.debug(
         `response headers: ${JSON.stringify(err.response.headers)}`,
       );
-      logger.error(
-        "Something gone wrong while calling the GitHub API (maybe check GITHUB_TOKEN?)",
-      );
-      logger.info(`response data: ${JSON.stringify(err.response.data)}`);
+      if (err.status === 404) {
+        logger.error('User not found on GitHub');
+      } else if (err.status === 403) {
+        logger.error('Authentication failed or rate limit exceeded');
+      } else if (err.status === 422) {
+        logger.error('User is already in the team');
+      } else {
+        logger.error("Something gone wrong while calling the GitHub API (maybe check GITHUB_TOKEN?)",);
+      }
+      logger.debug(`response data: ${JSON.stringify(err.response.data)}`);
       Deno.exit(1);
     }
   });
@@ -149,8 +148,8 @@ program
         team_slug,
         username,
       });
-      logger.info(`membership status: ${teamMembership.data.state}`),
-        logger.info(`team role: ${teamMembership.data.role}`);
+      logger.info(`membership status: ${teamMembership.data.state}`);
+      logger.info(`team role: ${teamMembership.data.role}`);
     } catch (err) {
       if (err.status == "404") {
         logger.warn(`membership status: not in team or org`);
@@ -162,7 +161,7 @@ program
         logger.error(
           "Something gone wrong while calling the GitHub API (maybe check GITHUB_TOKEN?)",
         );
-        logger.info(
+        logger.debug(
           `response data: ${JSON.stringify(err.response.data)}`,
         );
         Deno.exit(1);

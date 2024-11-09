@@ -84,17 +84,26 @@ export async function setBadgeData(
   }
 }
 
+
+/**
+ * Resolve badge icon name into a base64-encoded Data URL. Currently, handling
+ * simple icons are separently resolved via {@linkcode simpleIconLookup} function
+ * in `logos.ts`.
+ * @param icon Icon name.
+ * @returns 
+ */
 export async function resolveBadgeIcon(icon: string) {
   const kvApi = await kv(config.kvUrl);
+  let result: string | null
   if (icon == null) {
-    return null;
+    return undefined;
   }
   try {
-    const result = await kvApi.get<string | null>(["badgeIcons", icon]);
-    if (result.value == null && result.versionstamp == null) {
-      return null;
+    result = (await kvApi.get<string>(["badgeIcons", icon])).value;
+    if (result == null) {
+      return undefined;
     }
-    return result.value;
+    return result;
   } catch (error) {
     throw Error(error);
   }

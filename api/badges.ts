@@ -18,7 +18,7 @@ By default without the \`org\` query parameter, it will uses data from [Hack Clu
 but it will change to either \`recaptime-dev\` or \`lorebooks-wiki\` in the future.
 
 The generated badge includes your organization's balance after dividing \`balances.balance_cents\` from API to 100 to show up the cents \
-in USD.
+in USD, so please expect any inaccuraries from the division.
 `,
     request: {
       query: z.object({
@@ -34,7 +34,7 @@ in USD.
         }),
       }),
     },
-    responses: {
+    response: {
       "200": {
         description: "Generate a HCB badge with your organization balances",
         content: {
@@ -50,7 +50,7 @@ in USD.
 
   override async handle(c: Context) {
     const apiReqData = await this.getValidatedData<typeof this.schema>();
-    const { org, style } = apiReqData?.query;
+    const { org, style } = apiReqData?.query || {};
     const { result, code } = await getOrgData(org || "hq");
     console.log(`API result: ${JSON.stringify(result)} | code is ${code}`);
 
@@ -58,6 +58,82 @@ in USD.
       const bal = result.balances.balance_cents / 100;
       const badge: Format = {
         label: `HCB balance for ${result.name}`,
+        labelColor: "EC3750",
+        message: `USD ${bal}`,
+        logoBase64: await resolveBadgeIcon("hcb-dark"),
+        style: validateBadgeStyle(style),
+      };
+      console.log(badge);
+      const badgeSvg = makeBadge(badge);
+      return c.newResponse(badgeSvg, 200, {
+        "Content-Type": "image/svg+xml",
+        "Cache-Control": "max-age=300",
+      });
+    } else if (code == 404) {
+      const badgeSvg = makeBadge({
+        label: `HCB balance for unknown organization`,
+        labelColor: "EC3750",
+        message: `USD 0`,
+        logoBase64: await resolveBadgeIcon("hcb-dark"),
+        style: validateBadgeStyle(style)
+      });
+      return c.newResponse(badgeSvg, 404, {
+        "Content-Type": "image/svg+xml",
+        "Cache-Control": "max-age=300",
+      });
+    }
+  }
+}
+
+export class hcbTotalRasied extends OpenAPIRoute {
+  override schema = {
+    tags: ["hcb"],
+    summary: "Generate a SVG badge of a HCB organization's total raised amount",
+    description: `\
+By default without the \`org\` query parameter, it will uses data from [Hack Club HQ](https://hcb.hackclub.com/api/v3/organizations/hq), \
+but it will change to either \`recaptime-dev\` or \`lorebooks-wiki\` in the future.
+
+The generated badge includes your organization's total raised amount after dividing \`balances.total_raised\` from API to
+100 to show up the cents in USD, so please expect any inaccuraries from the division.
+`,
+    request: {
+      query: z.object({
+        org: Str({
+          description: "Organization slug or ID",
+          required: false,
+          default: "hq",
+        }),
+        style: Str({
+          description: "Badge style as supported by `badge-maker` npm library.",
+          required: false,
+          default: "flat",
+        }),
+      }),
+    },
+    response: {
+      "200": {
+        description: "Generate a HCB badge with your organization balances",
+        content: {
+          "image/svg+xml": {
+            schema: {
+              type: "string",
+            },
+          },
+        },
+      },
+    },
+  };
+
+  override async handle(c: Context) {
+    const apiReqData = await this.getValidatedData<typeof this.schema>();
+    const { org, style } = apiReqData?.query || {};
+    const { result, code } = await getOrgData(org || "hq");
+    console.log(`API result: ${JSON.stringify(result)} | code is ${code}`);
+
+    if (code == 200) {
+      const bal = result.balances.total_raised / 100;
+      const badge: Format = {
+        label: `Total raised on HCB for ${result.name}`,
         labelColor: "EC3750",
         message: `USD ${bal}`,
         logoBase64: await resolveBadgeIcon("hcb-dark"),
@@ -111,7 +187,7 @@ so it is easily clickable when added as a SVG object.
         }),
       }),
     },
-    responses: {
+    response: {
       "200": {
         content: {
           "image/svg+xml": {
@@ -219,8 +295,7 @@ including \`logo\` (not \`logoBase64\` for abuse prevention) and \`style\`.
       console.log(dbData);
 
       if (
-        apiReqData.query.json == true ||
-        acceptCT?.includes("application/json")
+        apiReqData.query.json == true && acceptCT?.includes("application/json")
       ) {
         if (dbData.result == null && dbData.versionStamp == null) {
           return c.json(

@@ -74,9 +74,8 @@ program
     if (data.value != null && data.versionstamp != null) {
       logger.info(data.value);
     } else {
-      logger.warn(
-        `badge icon with name ${iconName} may either not found or the KV value is blank`,
-      );
+      logger.error(`Badge icon '${iconName}' not found`);
+      Deno.exit(1);
     }
   });
 
