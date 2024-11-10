@@ -5,12 +5,12 @@ import { Octokit } from "@octokit/rest";
 
 const kvApi = await kv(config.kvUrl);
 const msgBuffer = (msg: string) => new TextEncoder().encode(msg);
-const github = (token: string) => new Octokit({
+export const github = (token: string) => new Octokit({
   auth: token,
-  userAgent: `@lorebooks-wiki/badges-api ${config.homepage}`
+  userAgent: `@lorebooks-wiki/badges-api $({config.homepage})`
 })
 
-interface UserDataOps {
+export type UserDataOps = {
   id: number | null;
   node_id: string | null;
   teamMembership: {
@@ -44,6 +44,7 @@ export async function handleGitHubAuth(
 
   try {
     const cachedAuthData = await kvApi.get<UserDataOps>(key);
+    console.log(`[api-auth-debug]: cachedAuthData: ${JSON.stringify(cachedAuthData)}`)
 
     if (cachedAuthData.value == null || forceCheck == true) {
       const user = await getAuthenticatedUser(token);
@@ -88,6 +89,7 @@ export async function handleGitHubAuth(
       }
       console.log(`[auth-checks] ttl not yet elapsed for ${key.toString()} (current: ${fiveMinsAgo}, was: ${cachedAuthData.value.expires_in})`)
     }
+    console.log(JSON.stringify(authData))
 
     if (adminEndpoint === true && authData.teamMembership.status !== "active") {
       return false

@@ -23,7 +23,7 @@ export const config = {
  * Validate `GITHUB_TOKEN` env value if it is a GitHub PAT based on the token prefix.
  * @returns The PAT itself if valid, otherwise throws a error.
  */
-export function getValidatedGithubToken(token: string): string {
+export function getValidatedGithubToken(): string {
   const token = Deno.env.get("GITHUB_TOKEN");
   if (!token) {
     throw new Error("GITHUB_TOKEN is not set in the environment variables.");

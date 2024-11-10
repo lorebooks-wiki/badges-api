@@ -90,17 +90,27 @@ app.use("/admin/*", bearerAuth({
     } else {
       return await handleGitHubAuth(token, true, forceCheckPerms)
     }
+  },
+  invalidAuthenticationHeaderMessage: {
+    ok: false,
+    error: {
+      code: "MISSING_AUTH",
+      message: "Authorization header is required"
+    }
+  },
+  invalidTokenMessage: {
+    ok: false,
+    error: {
+      code: "AUTH_ERROR",
+      message: "Your API token is invalid"
+    }
   }
 }))
 
 app.on(['POST', 'PUT', 'PATCH', 'DELETE'], "/badges/*", bearerAuth({
   verifyToken: async (token: string, c: Context) => {
     const forceCheckPerms = Boolean(c.req.query("force")) || false
-    if (c.req.path == "/admin/auth-test") {
-      return true
-    } else {
-      return await handleGitHubAuth(token, false, forceCheckPerms)
-    }
+    return await handleGitHubAuth(token, false, forceCheckPerms)
   },
 
 }))

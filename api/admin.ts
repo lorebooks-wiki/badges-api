@@ -1,9 +1,12 @@
-import { Bool, OpenAPIRoute, Str } from "chanfana";
+import { Bool, Num, OpenAPIRoute, Str } from "chanfana";
 import { Context } from "hono";
 import { z } from "zod";
-import { handleGitHubAuth, hashToken } from "../lib/githubAuth.ts";
+import { github, handleGitHubAuth, hashToken, UserDataOps } from "../lib/githubAuth.ts";
 import { kv } from "../lib/db.ts";
 import { config } from "../lib/config.ts";
+
+const { authServiceToken, org, team_slug } = config.github;
+const ghApi = github(authServiceToken)
 
 export class testGitHubAuth extends OpenAPIRoute {
   override schema = {
@@ -47,10 +50,10 @@ export class testGitHubAuth extends OpenAPIRoute {
     const result = await handleGitHubAuth(parsedAuthHeader[1], true, query?.force ?? false)
 
     try {
-      const dbMeta = await (await kv(config.kvUrl)).get(key)
+      const dbMeta = await (await kv(config.kvUrl)).get<UserDataOps>(key)
       return c.json({
         ok: result,
-        result: dbMeta ?? null
+        result: dbMeta.value ?? null
       })
     } catch (error) {
       console.error('KV store error:', error);
@@ -79,8 +82,76 @@ If they are not yet in the \`${config.github.org}\` GitHub organization, they'll
         username: Str({
           description: "The GitHub user to grant admin permissions",
           required: true
+        }),
+        force: Bool({
+          description: "Force checking permissions for authenticated user even if cached.",
+          default: false,
+          required: false
         })
+      })
+    },
+    responses: {
+      "200": {
+        description: "Successfully added/invited a user to the team",
+        content: {
+          "application/json": {
+            schema: z.object({
+              ok: Bool({ default: true }).default(true),
+              result: z.object({
+                message: Str({ default: "Successfully added" }),
+                ghApiResult: z.object({
+                  url: Str({ example: "https://api.github.com/organizations/78218015/team/10816194/memberships/username" }),
+                  role: Str({ example: "member" }),
+                  state: Str({ example: "pending" })
+                }),
+                ghApiStatus: Num({ default: 200 })
+              })
+            })
+          }
+        }
+      }
+    }
+  };
+
+  override async handle(c: Context) {
+    try {
+      const { query } = await this.getValidatedData<typeof this.schema>();
+      const apiResult = await ghApi.teams.addOrUpdateMembershipForUserInOrg({
+        org,
+        team_slug,
+        username: query.username
+      })
+
+      return c.json({
+        ok: true,
+        result: {
+          message: "Successfully added",
+          ghApiResult: apiResult.data,
+          ghApiStatus: apiResult.status
+        }
+      })
+    } catch (error) {
+      return c.json({
+        ok: false,
+        error: {
+          code: "GITHUB_API_ERROR",
+          message: "Something went wrong while adding into the API admins team.",
+          ghApiResult: error.response.data,
+          ghApiStatusCode: error.status
+        }
       })
     }
   }
+}
+
+export class revokeAdminAccess extends OpenAPIRoute {
+  // TODO: Implement this
+}
+
+export class getAdminUserInfo extends OpenAPIRoute {
+  // TODO: Implement this
+}
+
+export class listAdmins extends OpenAPIRoute {
+  // TODO: Implement this
 }
