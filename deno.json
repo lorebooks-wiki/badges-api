@@ -5,7 +5,7 @@
     "chanfana": "npm:chanfana",
     "zod": "npm:zod",
     "commander": "npm:commander",
-    "@octokit/rest": "npm:@octokit/rest",
+    "@octokit/rest": "npm:@octokit/rest@^21.0.2",
     "@badges/shields/": "https://raw.githubusercontent.com/badges/shields/master/",
     "joi": "npm:joi",
     "svg-path-commander": "npm:svg-path-commander",
@@ -38,7 +38,6 @@
   "deploy": {
     "project": "6bbdce0d-80f3-43dc-b1fe-59adca47e89f",
     "exclude": ["**/node_modules"],
-    "include": [],
     "entrypoint": "main.ts"
   },
   "unstable": ["kv", "bare-node-builtins"]

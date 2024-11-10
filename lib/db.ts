@@ -1,7 +1,7 @@
+import { BadgeDataDbstore } from "../utils/types.ts";
 import { config } from "./config.ts";
 
 export const kv = async (kvUrl?: string) => {
-  console.log(`loading KV from ${config.kvUrl || "local backend"}`);
   if (kvUrl !== undefined) {
     return await Deno.openKv(kvUrl);
   } else {
@@ -30,16 +30,17 @@ export type DbResult = {
     data: BadgeData;
   } | null;
   versionStamp: string | null;
-  error?: string | object;
+  // deno-lint-ignore no-explicit-any
+  error?: any;
 };
 
 export async function getBadgeData(
   project: string,
-  badgeName: string
+  badgeName: string,
 ): Promise<DbResult> {
   const kvApi = await kv(config.kvUrl);
   try {
-    const { value, versionstamp } = await kvApi.get([
+    const { value, versionstamp } = await kvApi.get<BadgeDataDbstore>([
       `staticBadges`,
       project,
       badgeName,
@@ -64,7 +65,7 @@ export async function setBadgeData(
   project: string,
   badgeName: string,
   type: "redirect" | "badge",
-  data: BadgeData
+  data: BadgeData,
 ) {
   const kvApi = await kv(config.kvUrl);
   try {
@@ -83,17 +84,26 @@ export async function setBadgeData(
   }
 }
 
+
+/**
+ * Resolve badge icon name into a base64-encoded Data URL. Currently, handling
+ * simple icons are separently resolved via {@linkcode simpleIconLookup} function
+ * in `logos.ts`.
+ * @param icon Icon name.
+ * @returns 
+ */
 export async function resolveBadgeIcon(icon: string) {
   const kvApi = await kv(config.kvUrl);
+  let result: string | null
   if (icon == null) {
-    return null;
+    return undefined;
   }
   try {
-    const result = await kvApi.get<string | null>(["badgeIcons", icon]);
-    if (result.value == null && result.versionstamp == null) {
-      return null;
+    result = (await kvApi.get<string>(["badgeIcons", icon])).value;
+    if (result == null) {
+      return undefined;
     }
-    return result.value;
+    return result;
   } catch (error) {
     throw Error(error);
   }

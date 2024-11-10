@@ -1,12 +1,12 @@
 /**
  * @module
- * A Fetch API-based API library for HCB API
+ * A minimal Fetch API-based API library for using the HCB API
  *
  * @license MIT
  */
 
 /**
- * Base URL of HCB API, used internally
+ * Base URL of HCB API, used internally for API requests.
  * @link https://hcb.hackclub.com/docs/api/v3
  */
 const baseUrl = "https://hcb.hackclub.com/api/v3";

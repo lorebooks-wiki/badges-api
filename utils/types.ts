@@ -1,5 +1,7 @@
+import { BadgeData } from "../lib/db.ts";
+
 /*
- * Copied from badge-maker's makeBadge types 
+ * Copied from badge-maker's makeBadge types
  */
 export interface Format {
   label?: string;
@@ -9,4 +11,9 @@ export interface Format {
   style?: "plastic" | "flat" | "flat-square" | "for-the-badge" | "social";
   logoBase64?: string;
   links?: Array<string>;
+}
+
+export type BadgeDataDbstore = {
+  type: "redirect" | "badge";
+  data: BadgeData;
 }
